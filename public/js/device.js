@@ -169,8 +169,8 @@
 					"ob": parseFloat(ob.toFixed(2)),
 					"og": parseFloat(og.toFixed(2)),
 					"bat_level": window.bat_level || -1,
-					"bat_charging": window.bat_charging || null,
-					"bat_timeleft": window.bat_chargingTime || null
+					"bat_charging": window.bat_charging,
+					"bat_timeleft": window.bat_chargingTime
 				}
 	        };
 	        var message = new Paho.MQTT.Message(JSON.stringify(payload));
