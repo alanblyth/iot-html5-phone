@@ -70,73 +70,82 @@
 		navigator.geolocation.watchPosition(updatePersonalLocation);
 	}
 
-	navigator.getBattery().then(function(battery) {
-		function updateAllBatteryInfo(){
-			updateChargeInfo();
-			updateLevelInfo();
-			updateChargingInfo();
-			updateDischargingInfo();
-		}
-		updateAllBatteryInfo();
-
-		battery.addEventListener('chargingchange', function(){
-			updateChargeInfo();
-		});
-		function updateChargeInfo(){
-			document.getElementById("bat_charging").innerHTML = (battery.charging ? "Yes" : "No");
-			
-			window.bat_charging = battery.charging;
-			console.log("Battery charging? " + (battery.charging ? "Yes" : "No"));
-
-			if (battery.charging){
+	if( (typeof navigator.getBattery) === 'function' ){
+		navigator.getBattery().then(function(battery) {
+			function updateAllBatteryInfo(){
+				updateChargeInfo();
+				updateLevelInfo();
 				updateChargingInfo();
-			}
-			else {
 				updateDischargingInfo();
 			}
-		}
+			updateAllBatteryInfo();
 
-		battery.addEventListener('levelchange', function(){
-			updateLevelInfo();
-		});
-		function updateLevelInfo(){
-			document.getElementById("bat_level").innerHTML = battery.level * 100 + "%";
-			window.bat_level = battery.level * 100;
-			console.log("Battery level: " + battery.level * 100 + "%");
-		}
+			battery.addEventListener('chargingchange', function(){
+				updateChargeInfo();
+			});
+			function updateChargeInfo(){
+				document.getElementById("bat_charging").innerHTML = (battery.charging ? "Yes" : "No");
+				
+				window.bat_charging = battery.charging;
+				console.log("Battery charging? " + (battery.charging ? "Yes" : "No"));
 
-		battery.addEventListener('chargingtimechange', function(){
-			updateChargingInfo();
-		});
-		function updateChargingInfo(){
-			if (battery.charging){
-				if (battery.chargingTime === Infinity){
-					document.getElementById("bat_time").innerHTML = "Calculating time remaining...";	
+				if (battery.charging){
+					updateChargingInfo();
 				}
 				else {
-					document.getElementById("bat_time").innerHTML = (battery.chargingTime / 60) + " minutes left before full charge";					
-				}	
-				window.bat_chargingTime = battery.chargingTime;
-				console.log("Battery charging time: " + battery.chargingTime + " seconds");			
-			}			
-		}
+					updateDischargingInfo();
+				}
+			}
 
-		battery.addEventListener('dischargingtimechange', function(){
-			updateDischargingInfo();
+			battery.addEventListener('levelchange', function(){
+				updateLevelInfo();
+			});
+			function updateLevelInfo(){
+				document.getElementById("bat_level").innerHTML = battery.level * 100 + "%";
+				window.bat_level = battery.level * 100;
+				console.log("Battery level: " + battery.level * 100 + "%");
+			}
+
+			battery.addEventListener('chargingtimechange', function(){
+				updateChargingInfo();
+			});
+			function updateChargingInfo(){
+				if (battery.charging){
+					if (battery.chargingTime === Infinity){
+						document.getElementById("bat_time").innerHTML = "Calculating time remaining...";	
+					}
+					else {
+						document.getElementById("bat_time").innerHTML = (battery.chargingTime / 60) + " minutes left before full charge";					
+					}	
+					window.bat_chargingTime = battery.chargingTime;
+					console.log("Battery charging time: " + battery.chargingTime + " seconds");			
+				}			
+			}
+
+			battery.addEventListener('dischargingtimechange', function(){
+				updateDischargingInfo();
+			});
+			function updateDischargingInfo(){
+				if (!battery.charging){
+					if (battery.dischargingTime === Infinity){
+						document.getElementById("bat_time").innerHTML = "Calculating time remaining...";	
+					}
+					else {
+						document.getElementById("bat_time").innerHTML = (battery.dischargingTime / 60) + " minutes battery time remaining";
+					}
+					window.bat_chargingTime = battery.dischargingTime;
+					console.log("Battery discharging time: " + battery.dischargingTime + " seconds");
+				}			
+			}
 		});
-		function updateDischargingInfo(){
-			if (!battery.charging){
-				if (battery.dischargingTime === Infinity){
-					document.getElementById("bat_time").innerHTML = "Calculating time remaining...";	
-				}
-				else {
-					document.getElementById("bat_time").innerHTML = (battery.dischargingTime / 60) + " minutes battery time remaining";
-				}
-				window.bat_chargingTime = battery.dischargingTime;
-				console.log("Battery discharging time: " + battery.dischargingTime + " seconds");
-			}			
-		}
-	});
+	}
+	else {
+		window.bat_level = 50;
+		window.bat_charging = false,
+		window.bat_chargingTime = 100;
+		console.warn("Browser doesn't support battery");
+	}
+
 
 	function getId() {
 
