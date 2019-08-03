@@ -70,6 +70,83 @@
 		navigator.geolocation.watchPosition(updatePersonalLocation);
 	}
 
+	if( (typeof navigator.getBattery) === 'function' ){
+		navigator.getBattery().then(function(battery) {
+			function updateAllBatteryInfo(){
+				updateChargeInfo();
+				updateLevelInfo();
+				updateChargingInfo();
+				updateDischargingInfo();
+			}
+			updateAllBatteryInfo();
+
+			battery.addEventListener('chargingchange', function(){
+				updateChargeInfo();
+			});
+			function updateChargeInfo(){
+				document.getElementById("bat_charging").innerHTML = (battery.charging ? "Yes" : "No");
+				
+				window.bat_charging = battery.charging;
+				console.log("Battery charging? " + (battery.charging ? "Yes" : "No"));
+
+				if (battery.charging){
+					updateChargingInfo();
+				}
+				else {
+					updateDischargingInfo();
+				}
+			}
+
+			battery.addEventListener('levelchange', function(){
+				updateLevelInfo();
+			});
+			function updateLevelInfo(){
+				document.getElementById("bat_level").innerHTML = battery.level * 100 + "%";
+				window.bat_level = battery.level * 100;
+				console.log("Battery level: " + battery.level * 100 + "%");
+			}
+
+			battery.addEventListener('chargingtimechange', function(){
+				updateChargingInfo();
+			});
+			function updateChargingInfo(){
+				if (battery.charging){
+					if (battery.chargingTime === Infinity){
+						document.getElementById("bat_time").innerHTML = "Calculating time remaining...";	
+					}
+					else {
+						document.getElementById("bat_time").innerHTML = (battery.chargingTime / 60) + " minutes left before full charge";					
+					}	
+					window.bat_chargingTime = battery.chargingTime;
+					console.log("Battery charging time: " + battery.chargingTime + " seconds");			
+				}			
+			}
+
+			battery.addEventListener('dischargingtimechange', function(){
+				updateDischargingInfo();
+			});
+			function updateDischargingInfo(){
+				if (!battery.charging){
+					if (battery.dischargingTime === Infinity){
+						document.getElementById("bat_time").innerHTML = "Calculating time remaining...";	
+					}
+					else {
+						document.getElementById("bat_time").innerHTML = (battery.dischargingTime / 60) + " minutes battery time remaining";
+					}
+					window.bat_chargingTime = battery.dischargingTime;
+					console.log("Battery discharging time: " + battery.dischargingTime + " seconds");
+				}			
+			}
+		});
+	}
+	else {
+		window.bat_level = 50;
+		window.bat_charging = false,
+		window.bat_chargingTime = 100;
+		console.warn("Browser doesn't support battery");
+	}
+
+
 	function getId() {
 
 		window.deviceId = prompt("Enter a unique ID of at least 8 characters containing only letters and numbers:");
@@ -99,7 +176,10 @@
 					"az": parseFloat(az.toFixed(2)),
 					"oa": parseFloat(oa.toFixed(2)),
 					"ob": parseFloat(ob.toFixed(2)),
-					"og": parseFloat(og.toFixed(2))
+					"og": parseFloat(og.toFixed(2)),
+					"bat_level": window.bat_level || -1,
+					"bat_charging": window.bat_charging,
+					"bat_timeleft": window.bat_chargingTime
 				}
 	        };
 	        var message = new Paho.MQTT.Message(JSON.stringify(payload));

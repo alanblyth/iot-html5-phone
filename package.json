@@ -1,5 +1,5 @@
 {
-  "name":"iot-html5-phone",
+  "name": "iot-html5-phone",
   "version": "0.0.1",
   "description": "IoT mobile html5 app",
   "scripts": {
@@ -11,7 +11,7 @@
     "mqtt": "*"
   },
   "engines": {
-		"node": "0.10.26"
+    "node": "8.9.0"
   },
   "repository": {}
 }
